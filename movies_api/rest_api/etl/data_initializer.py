@@ -21,11 +21,11 @@ def initialize_data():
         return df
 
     def list_csv():
-        file_list = os.listdir('csv')
+        file_list = os.listdir('movies_api/csv')
         available_csv = []
         for file in file_list:
             if file.endswith('.csv'):
-                available_csv.append(f'csv/{file}')
+                available_csv.append(f'movies_api/csv/{file}')
 
         return available_csv
 

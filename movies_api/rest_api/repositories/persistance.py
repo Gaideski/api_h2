@@ -3,36 +3,51 @@ import jaydebeapi
 from models.movies_schema import moviesSchema, movieProducerSchema, producerSchema, studioSchema
 import os
 from marshmallow.decorators import post_load
+from pathlib import Path
+
+
+class SingletonConnection(object):
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(SingletonConnection, cls).__new__(cls)
+        return cls.instance
 
 
 def initialize():
-    _execute(
-        ("CREATE TABLE IF NOT EXISTS exoplanets ("
-         "  id INT PRIMARY KEY AUTO_INCREMENT,"
-         "  name VARCHAR NOT NULL,"
-         "  year_discovered SIGNED,"
-         "  light_years FLOAT,"
-         "  mass FLOAT,"
-         "  link VARCHAR)"))
+    # Initialize db connecion
+    conn = SingletonConnection()
+    embedded_path = os.path.abspath('movies_api/database/embedded')
+    exec_jar = os.path.abspath('movies_api/database/h2/bin/h2-2.1.214.jar')
+    conn.connection = jaydebeapi.connect(
+        "org.h2.Driver",
+        "jdbc:h2:mem:test_mem",
+        ["SA", ""],
+        exec_jar)
+    # conn.connection = jaydebeapi.connect(
+    #     "org.h2.Driver",
+    #     "jdbc:h2:"+embedded_path,
+    #     ["SA", ""],
+    #     exec_jar)
+    sql = Path('field schema.sql').read_text()
+    sql = sql.split(";")
+    for entry in sql:
+        _execute(entry.strip()+';')
 
 
 def _execute(query, returnResult=None):
-    embedded_path = os.path.abspath('database\embedded')
-    exec_jar = os.path.abspath('database\h2\\bin\h2-2.1.214.jar')
-    connection = jaydebeapi.connect(
-        "org.h2.Driver",
-        "jdbc:h2:"+embedded_path,
-        ["SA", ""],
-        exec_jar)
-    cursor = connection.cursor()
-    cursor.execute('use awards;')
+    conn = SingletonConnection()
+    cursor = conn.connection.cursor()
+    #cursor.execute('use awards;')
     cursor.execute(query)
     if returnResult:
         returnResult = _convert_to_schema(cursor)
     cursor.close()
-    connection.close()
-
     return returnResult
+
+
+def close_conection():
+    conn = SingletonConnection()
+    conn.connection.close()
 
 
 def _convert_to_schema(cursor):
@@ -51,46 +66,57 @@ def get(Id):
     return _execute("SELECT * FROM exoplanets WHERE id = {}".format(Id), returnResult=True)
 
 
-def create(exoplanet):
-    count = _execute("SELECT count(*) AS count FROM exoplanets WHERE name LIKE '{}'".format(
-        exoplanet.get("name")), returnResult=True)
-    if count[0]["count"] > 0:
-        return
+def _insert_get_id(query, data, table):
+    count = _execute(query, returnResult=True)
+    if (len(count) > 0 and count[0]["id"] > 0):
+        return count[0]["id"]
 
-    columns = ", ".join(exoplanet.keys())
-    values = ", ".join("'{}'".format(value) for value in exoplanet.values())
-    _execute("INSERT INTO exoplanets ({}) VALUES({})".format(columns, values))
-
-    return {}
-
-
-def update(exoplanet, Id):
+    columns = ", ".join(data.keys())
+    values = ", ".join("'{}'".format(value) for value in data.values())
     count = _execute(
-        "SELECT count(*) AS count FROM exoplanets WHERE id = {}".format(Id), returnResult=True)
-    if count[0]["count"] == 0:
-        return
+        "INSERT INTO {} ({}) VALUES({})".format(table, columns, values))
+    return _insert_get_id(query, data, table)
 
-    values = ["'{}'".format(value) for value in exoplanet.values()]
-    update_values = ", ".join("{} = {}".format(key, value)
-                              for key, value in zip(exoplanet.keys(), values))
-    _execute("UPDATE exoplanets SET {} WHERE id = {}".format(update_values, Id))
 
-    return {}
+@post_load
+def insert_get_movie_id(movie):
+    query = f"SELECT id FROM MOVIE WHERE title = '{movie['title']}' and release = {movie['release']}"
+    table = 'Movie'
+    return _insert_get_id(query, movie, table)
 
+
+@post_load
+def insert_get_movie_producer_id(movieproducer):
+    query = f"""SELECT id FROM MOVIEPRODUCER WHERE idproducer={movieproducer['idproducer']}
+     and idmovie={movieproducer['idmovie']}"""
+    table = 'MOVIEPRODUCER'
+    return _insert_get_id(query, movieproducer, table)
+
+@post_load
+def insert_get_movie_studio_id(moviestudio):
+    query = f"""SELECT id FROM MOVIESTUDIO WHERE idstudio={moviestudio['idstudio']}
+     and idmovie={moviestudio['idmovie']}"""
+    table = 'MOVIESTUDIO'
+    return _insert_get_id(query, moviestudio, table)
 
 @post_load
 def insert_get_producer_or_studio_id(producer, is_studio=None):
     table = 'STUDIO' if is_studio else 'PRODUCER'
-    count = _execute("SELECT id FROM {} WHERE name LIKE '{}'".format(
-        table,producer["name"]), returnResult=True)
-    if (len(count) > 0 and count[0]["id"] > 0):
-        return count[0]["id"]
+    query = "SELECT id FROM {} WHERE name LIKE '{}'".format(
+        table, producer["name"])  
+    return _insert_get_id(query,producer,table)
 
-    columns = ", ".join(producer.keys())
-    values = ", ".join("'{}'".format(value) for value in producer.values())
+
+def get_all_movies():
     count = _execute(
-        "INSERT INTO {} ({}) VALUES({})".format(table,columns, values))
-    return insert_get_producer_or_studio_id(producer,is_studio)
+        f"SELECT * FROM MOVIE;", returnResult=True)
+    return count
+
+
+def get_all_table(table):
+    count = _execute(
+        "SELECT * FROM {};".format(table), returnResult=True)
+    return count
 
 
 def get_producer_id(producer):
@@ -100,11 +126,7 @@ def get_producer_id(producer):
         return
 
 
-def delete(Id):
+def get_schema_tables():
     count = _execute(
-        "SELECT count(*) AS count FROM exoplanets WHERE id = {}".format(Id), returnResult=True)
-    if count[0]["count"] == 0:
-        return
-
-    _execute("DELETE FROM exoplanets WHERE id = {}".format(Id))
-    return {}
+        "SHOW TABLES FROM AWARDS;", returnResult=True)
+    return count

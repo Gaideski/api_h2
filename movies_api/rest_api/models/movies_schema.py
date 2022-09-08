@@ -10,7 +10,6 @@ class producerSchema(Schema):
 
 class moviesSchema(Schema):
     id = fields.Integer()
-    studio = fields.Nested(studioSchema)
     title = fields.Str()
     release = fields.Integer()
     winner = fields.Boolean()
@@ -19,5 +18,10 @@ class moviesSchema(Schema):
 
 class movieProducerSchema(Schema):
     id = fields.Integer()
-    idmovie = fields.Nested(moviesSchema)
-    idproducer = fields.Nested(producerSchema)
+    idmovie = fields.Integer()
+    idproducer = fields.Integer()
+
+class movieStudioSchema(Schema):
+    id = fields.Integer()
+    idmovie = fields.Integer()
+    idstudio = fields.Integer()

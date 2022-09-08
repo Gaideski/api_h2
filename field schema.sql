@@ -1,28 +1,35 @@
-create schema awards;
-use awards;
+CREATE SCHEMA IF NOT EXISTS awards;
+USE awards;
 
-create table studio(
+CREATE TABLE IF NOT EXISTS studio(
 id int primary key auto_increment,
 name varchar(max) NOT NULL
 );
 
-create table producer(
+CREATE TABLE IF NOT EXISTS producer(
 id int primary key auto_increment,
 name varchar(max) not null
 );
 
-create table Movie(
+CREATE TABLE IF NOT EXISTS Movie(
 id int primary key auto_increment,
 title varchar(max) not null,
 winner boolean not null,
-idStudio INTEGER ,
-foreign key (idStudio ) references STUDIO(id)
+release INTEGER not null
 );
 
-create table movie_producer(
+CREATE TABLE IF NOT EXISTS MovieProducer(
 id int primary key auto_increment,
 idProducer INTEGER NOT NULL,
 idMovie INTEGER NOT NULL,
 foreign key (idProducer ) references producer(id),
+foreign key (idMovie ) references movie(id)
+);
+
+CREATE TABLE IF NOT EXISTS MovieStudio(
+id int primary key auto_increment,
+idStudio INTEGER NOT NULL,
+idMovie INTEGER NOT NULL,
+foreign key (idStudio ) references Studio(id),
 foreign key (idMovie ) references movie(id)
 );
