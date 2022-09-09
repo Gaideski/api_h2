@@ -1,10 +1,8 @@
-
 import jaydebeapi
-from models.movies_schema import moviesSchema, movieProducerSchema, producerSchema, studioSchema
+from models.movies_schema import moviesSchema
 import os
 from marshmallow.decorators import post_load
-from pathlib import Path
-
+from etl.csv_extractor import get_case_query, get_database_creation_query
 
 class SingletonConnection(object):
     def __new__(cls):
@@ -12,32 +10,35 @@ class SingletonConnection(object):
             cls.instance = super(SingletonConnection, cls).__new__(cls)
         return cls.instance
 
+# Thanks to https://stackabuse.com/integrating-h2-with-python-and-flask/
+# for the connection string and cursor load
 
 def initialize():
     # Initialize db connecion
     conn = SingletonConnection()
     embedded_path = os.path.abspath('movies_api/database/embedded')
     exec_jar = os.path.abspath('movies_api/database/h2/bin/h2-2.1.214.jar')
-    conn.connection = jaydebeapi.connect(
-        "org.h2.Driver",
-        "jdbc:h2:mem:test_mem",
-        ["SA", ""],
-        exec_jar)
     # conn.connection = jaydebeapi.connect(
     #     "org.h2.Driver",
-    #     "jdbc:h2:"+embedded_path,
+    #     "jdbc:h2:mem:test_mem",
     #     ["SA", ""],
     #     exec_jar)
-    sql = Path('field schema.sql').read_text()
+    conn.connection = jaydebeapi.connect(
+        "org.h2.Driver",
+        "jdbc:h2:"+embedded_path,
+        ["SA", ""],
+        exec_jar)
+    sql = get_database_creation_query()
     sql = sql.split(";")
     for entry in sql:
         _execute(entry.strip()+';')
-
+  
+def get_conn():
+    return SingletonConnection().connection
 
 def _execute(query, returnResult=None):
     conn = SingletonConnection()
     cursor = conn.connection.cursor()
-    #cursor.execute('use awards;')
     cursor.execute(query)
     if returnResult:
         returnResult = _convert_to_schema(cursor)
@@ -48,7 +49,6 @@ def _execute(query, returnResult=None):
 def close_conection():
     conn = SingletonConnection()
     conn.connection.close()
-
 
 def _convert_to_schema(cursor):
     column_names = [record[0].lower() for record in cursor.description]
@@ -113,7 +113,7 @@ def get_all_movies():
     return count
 
 
-def get_all_table(table):
+def get_all_from_table(table):
     count = _execute(
         "SELECT * FROM {};".format(table), returnResult=True)
     return count
@@ -125,7 +125,14 @@ def get_producer_id(producer):
     if count[0]["count"] == 0:
         return
 
+def get_movies_count():
+    count = _execute("SELECT COUNT(*) FROM MOVIE", returnResult=True)
+    return count[0]['count']
 
+def get_case():
+    count = _execute(get_case_query(),returnResult=True)
+    return count
+    
 def get_schema_tables():
     count = _execute(
         "SHOW TABLES FROM AWARDS;", returnResult=True)

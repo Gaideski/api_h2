@@ -14,7 +14,7 @@ year;title;studios;producers;winner
 
 ## Get the output Json
 <p>
-Get request into 'localhost:7777/main' will return the expected json
+Get request into 'localhost:5000/' will return the expected json
 </p>
 
 ## Database architecture
