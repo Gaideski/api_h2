@@ -1,5 +1,4 @@
 import pandas as pd
-import re
 from models.movies_schema import *
 from repositories.persistance import insert_get_producer_or_studio_id, initialize
 from repositories.persistance import insert_get_movie_id, insert_get_movie_producer_id

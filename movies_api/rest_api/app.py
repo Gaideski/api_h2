@@ -27,4 +27,4 @@ if __name__ == "__main__":
     dataframes = initialize_data()
     if dataframes is not None:
         insert_database_data(dataframes)
-    create_app().run()
+    create_app().run(host='0.0.0.0')

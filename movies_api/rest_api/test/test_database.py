@@ -28,11 +28,6 @@ class TestDatabase(TestCase):
         close_conection()
         self.assertGreater(len(schema),0)
 
-    def test_insert_producers(self):
-        initialize()
-        ids = insert_get_producer_or_studio_id([{'name':'test1'},{'name':'test2'}])
-        close_conection()
-
     def test_load_dataset(self):
         initialize()
         df = initialize_data()

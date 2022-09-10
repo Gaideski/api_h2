@@ -3,7 +3,7 @@ from unittest import TestCase
 import sys
 import os
 sys.path.insert(0, os.path.abspath('movies_api/rest_api'))
-from etl.data_initializer import *
+from etl.csv_extractor import *
 
 
 class TestCSV(TestCase):
@@ -17,6 +17,5 @@ class TestCSV(TestCase):
         self.assertFalse(df.empty)
 
     
-
 if __name__ == '__main__':
     unittest.main()
