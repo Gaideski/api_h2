@@ -18,16 +18,16 @@ def initialize():
     conn = SingletonConnection()
     embedded_path = os.path.abspath('movies_api/database/embedded')
     exec_jar = os.path.abspath('movies_api/database/h2/bin/h2-2.1.214.jar')
-    # conn.connection = jaydebeapi.connect(
-    #     "org.h2.Driver",
-    #     "jdbc:h2:mem:test_mem",
-    #     ["SA", ""],
-    #     exec_jar)
     conn.connection = jaydebeapi.connect(
         "org.h2.Driver",
-        "jdbc:h2:"+embedded_path,
+        "jdbc:h2:mem:test_mem",
         ["SA", ""],
         exec_jar)
+    # conn.connection = jaydebeapi.connect(
+    #     "org.h2.Driver",
+    #     "jdbc:h2:"+embedded_path,
+    #     ["SA", ""],
+    #     exec_jar)
     sql = get_database_creation_query()
     sql = sql.split(";")
     for entry in sql:
@@ -75,6 +75,7 @@ def _insert_get_id(query, data, table):
     values = ", ".join("'{}'".format(value) for value in data.values())
     count = _execute(
         "INSERT INTO {} ({}) VALUES({})".format(table, columns, values))
+    print(f"New entry added to table {table}")
     return _insert_get_id(query, data, table)
 
 

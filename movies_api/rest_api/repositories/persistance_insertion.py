@@ -21,7 +21,6 @@ def insert_database_data(df):
         movieproducer_id = insert_movie_producer(producers_id, movie_id)
         moviestudio_id = insert_movie_studio(studios_id, movie_id)
         movies_added+=1
-        print('one row!')
     return movies_added
 
 def insert_movie_studio(list_studio_id, movie_id):

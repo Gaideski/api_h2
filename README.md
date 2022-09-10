@@ -88,7 +88,7 @@ The integration test focuses on checking if the location, extraction, and insert
 
 ## Loading a new csv 'movie list'
 <p>
-Copy the .csv file into folder movies_api/csv before initializing the api.
+Copy the .csv file into folder <strong>/path/to/project/api_h2/movies_api/csv</strong> before initializing the api.
 </p>
 
 The csv <strong>must</strong> have those headers:
@@ -121,3 +121,19 @@ Get request into 'localhost:5000/' will return the expected json
 
 ## Postman documentation
 More documentation about the api is available at [REQUEST EXAMPLES](https://documenter.getpostman.com/view/2262340/VVJ6yaXP)
+
+
+<h1>Docker build</h1>
+The project also have a Dockerfile to build, you can try build it with:
+
+> - ### Building
+> - 
+> - Open the terminal, cmd or alike
+> - go to the Dockerfile dir
+> - execute 'docker build -t texo_backend  .' 
+> - then docker run 'docker run -d --name docker_from_build -p 5000:5000 -p 22:22 texo_backend'
+> - try access from your browser
+
+## Update the csv
+
+To update the csv from the docker, just access the docker from ftp as 'ftp://root@docker_from_build.local', replace the files from /app/movies-api/csv and restart the docker
