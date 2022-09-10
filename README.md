@@ -86,6 +86,22 @@ The integration test focuses on checking if the location, extraction, and insert
 
 <h1>Usage</h1>
 
+
+
+
+<br>
+<h1> Running the code</h1>
+
+
+### Running from command line :
+> 1.  Download the project from github: 'git clone https://github.com/Gaideski/api_h2.git'
+> 2.  Extract all the files to your choosen path
+> 3.  Install the requirements 'pip install -r choosen/path/API_h2/requeriments.txt'
+> 4.  Run 'python choosen/path/API_h2/movies_api/rest_api/app.py'
+
+<br>
+
+
 ## Loading a new csv 'movie list'
 <p>
 Copy the .csv file into folder <strong>/path/to/project/api_h2/movies_api/csv</strong> before initializing the api.
@@ -100,22 +116,13 @@ year;title;studios;producers;winner
 <p>
 Get request into 'localhost:5000/' will return the expected json
 </p>
-
-
-<br>
-<h1> Running the code</h1>
-
-
-### Running from command line :
-<p>Call python path/to/movies_api/rest_api/app.py</p>
-
 <br>
 <h1>Integration test</h1>
 
-
-
 ### Running from the command line:
-<p>python -m unittest discover path/to/movies_api/rest_api/test "test_*" </p>
+
+Follow the steps from the 'running the code' until step 3.<br>
+Run ' python -m unittest discover choosen/path/API_h2/movies_api/rest_api/test "test_*" '
 
 <h1>Extras</h1>
 
@@ -131,9 +138,15 @@ The project also have a Dockerfile to build, you can try build it with:
 > - Open the terminal, cmd or alike
 > - go to the Dockerfile dir
 > - execute 'docker build -t texo_backend  .' 
-> - then docker run 'docker run -d --name docker_from_build -p 5000:5000 -p 22:22 texo_backend'
+> - then docker run 'docker run -d gaideski/texo_backend -p 5000:5000 -p 22:22'
 > - try access from your browser
+
+
+### Running 
+
+It's possible also to run directly from docker hub using: 'docker run -d -p 5000:5000 -p 22:22 gaideski/texo_backend'
+
 
 ## Update the csv
 
-To update the csv from the docker, just access the docker from ftp as 'ftp://root@docker_from_build.local', replace the files from /app/movies-api/csv and restart the docker
+To update the csv from the docker, just access the docker from sftp as 'sftp://root:screencast@localhost', replace the files from /app/movies-api/csv, and restart the docker

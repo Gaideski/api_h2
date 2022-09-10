@@ -1,6 +1,6 @@
 #!/bin/bash
 
 while true;do
-    /usr/bin/supervisord &
+    /usr/sbin/sshd -D &
     python movies_api/rest_api/app.py
     done
