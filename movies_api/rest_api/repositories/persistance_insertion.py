@@ -10,17 +10,20 @@ def insert_database_data(df):
     movies_added=0
     df = df.reset_index()
     for index, row in df.iterrows():
-        producers_id = insert_producers_or_studio(
-            row['producers'].replace("'", "''"))
-        studios_id = insert_producers_or_studio(
-            row['studios'].replace("'", "''"), is_studio=True)
-        movie_id = insert_movie({'release': row['year'],
-                                 'title': row['title'].replace("'", "''"),
-                                 'winner': row['winner'] if not pd.isna(row['winner']) else False
-                                 })
-        movieproducer_id = insert_movie_producer(producers_id, movie_id)
-        moviestudio_id = insert_movie_studio(studios_id, movie_id)
-        movies_added+=1
+        try:
+            producers_id = insert_producers_or_studio(
+                row['producers'].replace("'", "''"))
+            studios_id = insert_producers_or_studio(
+                row['studios'].replace("'", "''"), is_studio=True)
+            movie_id = insert_movie({'release': row['year'],
+                                    'title': row['title'].replace("'", "''"),
+                                    'winner': row['winner'] if not pd.isna(row['winner']) else False
+                                    })
+            movieproducer_id = insert_movie_producer(producers_id, movie_id)
+            moviestudio_id = insert_movie_studio(studios_id, movie_id)
+            movies_added+=1
+        except Exception as e:
+                print(f'Csv file format incorrect, ignoring the line: {row}. Exception: {e.__cause__}')    
     return movies_added
 
 def insert_movie_studio(list_studio_id, movie_id):
