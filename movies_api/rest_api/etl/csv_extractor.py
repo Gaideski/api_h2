@@ -35,7 +35,6 @@ def load_csv(file_path):
                         on_bad_lines='warn')
     df = filter_rows_by_values(df,columns,columns)      
     df["year"] = pd.to_numeric(df["year"], errors='raise')
-    df["winner"] =  df["winner"].astype('bool')
     return df
 
 def list_csv():
